@@ -2,10 +2,9 @@ from flask import Flask, redirect, request, url_for, render_template,session
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-
 SPOTIFY_CLIENT_ID = "992dc94fe5c04e0ea321e5632023b728"
 SPOTIFY_CLIENT_SECRET = "20428fa42c194eed93de0dd091447bba"
-SPOTIFY_REDIRECT_URI = "https://5000-deangeligiul-prgspotify-us3tgyw91fz.ws-eu117.gitpod.io/callback" #dopo il login andiamo qui
+SPOTIFY_REDIRECT_URI = "https://5000-deangeligiul-prgspotify-s14caz58e17.ws-eu117.gitpod.io/callback" #dopo il login andiamo qui
 
 app = Flask(__name__)
 app.secret_key = 'chiave_per_session' #ci serve per identificare la sessione
@@ -44,7 +43,12 @@ def home():
 
 @app.route('/brani/<playlist_id>')
 def playlist_items(playlist_id):
-    token_info = session.get('token_info', None)
+    token_info = session.get('token_info', None) #recupero token sissione (salvato prima)
+    if not token_info:
+        return redirect(url_for('login'))
+    sp = spotipy.Spotify(auth=token_info['access_token'])
+    tracks_data = sp.playlist_tracks(playlist_id)['items']  # Ottiene i brani della playlist
+    return render_template('brani.html', tracks=tracks_data)
 
 @app.route('/logout')
 def logout():
